@@ -1,5 +1,42 @@
 {
-  "name": "new_repo",
-  "sources": { },
-  "tasks": { }
+  "name": "toolchain",
+  "config": "WORKSPACE_DIR=\"$(pwd)/workspace\"\nSOURCE_DIR=\"$(pwd)/sources\"\nTOOLCHAIN_TYPE=\"glibc\"\nINSTALL_DIR=\"$(pwd)/install\"\nARC_VERSION=archs\n",
+  "sources": {
+    "binutils": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb.git"
+    },
+    "glibc": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/glibc.git"
+    },
+    "newlib": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/newlib.git"
+    },
+    "linux": {
+      "repo": "git@github.com:foss-for-synopsys-dwc-arc-processors/linux.git"
+    },
+    "gcc": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc.git"
+    },
+    "uclibc-ng": {
+      "repo": "https://cgit.uclibc-ng.org/cgi/cgit/uclibc-ng.git/"
+    },
+    "toolchain": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/toolchain.git"
+    },
+    "gdb": {
+      "repo": "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb.git"
+    }
+  },
+  "tasks": {
+    "build": {
+      "code": "#!/bin/bash\n# Code for task build.\n#\n# Persistent: true\n# DependsOn:\n# Vars: WORKSPACE_DIR SOURCE_DIR TOOLCHAIN_TYPE INSTALL_DIR ARC_VERSION\n#\n# Please edit this file to execute the desired operation.\n# Return 0 for success != 0 for fail.\n# The return value determines when persistency is satifiable.\n\n\n#!/bin/bash\n\nmkdir -p ${WORKSPACE_DIR}\ncd ${WORKSPACE_DIR}\nBUILD_DIR=\"${WORKSPACE_DIR}/build\"\n\ncp -aHf ${SOURCE_DIR}/toolchain ${WORKSPACE_DIR}/toolchain\ncp -aHf ${SOURCE_DIR}/verification-scripts ${WORKSPACE_DIR}/verification-scripts\nln -sf ${SOURCE_DIR}/binutils ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/gdb ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/gcc ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/newlib ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/uClibc ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/linux ${WORKSPACE_DIR}/.\nln -sf ${SOURCE_DIR}/glibc ${WORKSPACE_DIR}/.\n\ncd ${WORKSPACE_DIR}/toolchain\nmkdir -p ${BUILD_DIR}\n\nif [ \"${TOOLCHAIN_TYPE}\" = \"elf32\" ]; then\n  ELF_TOOLCHAIN=\"y\"\nelif [ \"${TOOLCHAIN_TYPE}\" = \"uclibc\" ]; then\n  UCLIBC_TOOLCHAIN=\"y\"\nelif [ \"${TOOLCHAIN_TYPE}\" = \"glibc\" ]; then\n  GLIBC_TOOLCHAIN=\"y\"\nelse\n  echo \"TOOLCHAIN should be either elf32, uclibc or glibc\"\n  exit 1\nfi\n\n\nOPTIONS=\"--no-multilib\"\nif [ \"${ELF_TOOLCHAIN}\" = \"y\" ]; then\nOPTIONS=\"${OPTIONS} --elf32\"\nelse\nOPTIONS=\"${OPTIONS} --no-elf32\"\nfi\nif [ \"${UCLIBC_TOOLCHAIN}\" = \"y\" ]; then\nOPTIONS=\"${OPTIONS} --uclibc\"\nelse\nOPTIONS=\"${OPTIONS} --no-uclibc\"\nfi\nif [ \"${GLIBC_TOOLCHAIN}\" = \"y\" ]; then\nOPTIONS=\"${OPTIONS} --glibc\"\nelse\nOPTIONS=\"${OPTIONS} --no-glibc\"\nfi\n\nARC_VERSION=archs\n\n./build-all.sh --config-extra --with-python=no \\\n--no-auto-pull --no-auto-checkout --no-native-gdb --no-optsize-newlib \\\n--no-optsize-libstdc++ --no-external-download \\\n${OPTIONS} --cpu ${ARC_VERSION}  \\\n--build-dir ${BUILD_DIR} \\\n--target-cflags \"-O2 -g -mcpu=archs\" --release-name \"arcker build\" \\\n--install-dir ${INSTALL_DIR} \\\n--native-gdb \\\n--no-pdf\n\nexit $?\n",
+      "dirty": false
+    },
+    "test": {
+      "code": "#!/bin/bash\n# Code for task test.\n#\n# Persistent: true\n# DependsOn: build\n# Vars:\n#\n# Please edit this file to execute the desired operation.\n# Return 0 for success != 0 for fail.\n# The return value determines when persistency is satifiable.\n\necho \"This is the test.\"\n\nexit 0\n",
+      "dirty": false
+    }
+  },
+  "configs": {
+  }
 }
