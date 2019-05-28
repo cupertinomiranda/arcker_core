@@ -1,5 +1,21 @@
 {
-  "name": "new_repo",
-  "sources": { },
-  "tasks": { }
+  "name": "qemu-czi",
+  "config": "arcinstall=/home/claziss/projects/Synopsys/work1/INSTALL\n",
+  "sources": {
+    "arc-qemu": {
+      "repo": "git@github.com:foss-for-synopsys-dwc-arc-processors/qemu.git"
+    }
+  },
+  "tasks": {
+    "build": {
+      "code": "#!/bin/bash\n# Code for task build.\n#\n# Persistent: true\n# DependsOn:\n# Vars:\n#\n# Please edit this file to execute the desired operation.\n# Return 0 for success != 0 for fail.\n# The return value determines when persistency is satifiable.\n\nset -e\n\nreadonly ROOT=$(pwd)\n\n# populating the directories\nmkdir -p ${ROOT}/install\nmkdir -p ${ROOT}/build\n\n# configuring in the build directory\ncd ${ROOT}/build\n${ROOT}/sources/arc-qemu/configure --target-list=arc-softmmu --enable-debug --disable-pie --prefix=${ROOT}/install --enable-debug-tcg --enable-trace-backends=log --extra-cflags=\"-O0 -g3 -save-temps=obj\"\n\n# building the damn thing and installing\nmake -j 8\nmake install\n\nexit 0\n",
+      "dirty": false
+    },
+    "test": {
+      "code": "#!/bin/bash\n# Code for task test.\n#\n# Persistent: false\n# DependsOn: build\n# Vars: arcinstall\n#\n# Please edit this file to execute the desired operation.\n# Return 0 for success != 0 for fail.\n# The return value determines when persistency is satifiable.\n\nset -e\n\nexport PATH=\"${arcinstall}/bin:$PATH\"\n\nreadonly ROOT=$(pwd)\n\ncd ${ROOT}/build/tests/tcg/arc\nmake\nmake check\n\nexit 0\n",
+      "dirty": true
+    }
+  },
+  "configs": {
+  }
 }
