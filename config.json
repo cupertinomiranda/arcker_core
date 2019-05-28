@@ -1,5 +1,10 @@
 {
-  "name": "new_repo",
-  "sources": { },
-  "tasks": { }
+  "name": "tino_test6",
+  "sources": {
+  },
+  "tasks": {
+  },
+  "configs": {
+  },
+  "config": "#test6\n"
 }
